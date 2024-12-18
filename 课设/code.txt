@@ -1,23 +1,11 @@
-/*在fork.c的copy_process()的第一行添加以下代码即可*/
-long *krnstack;
-p = (struct task_struct *) get_free_page();
-krnstack = (long)(PAGE_SIZE +(long)p);
- *(--krnstack) = ss & 0xffff;
- *(--krnstack) = esp;
-  *(--krnstack) = eflags;
- *(--krnstack) = cs & 0xffff;
- *(--krnstack) = eip;
- *(--krnstack) = ds & 0xffff;
- *(--krnstack) = es & 0xffff;
- *(--krnstack) = fs & 0xffff;
- *(--krnstack) = gs & 0xffff;
- *(--krnstack) = esi;
- *(--krnstack) = edi;
- *(--krnstack) = edx;
- *(--krnstack) = (long)first_return_from_kernel;
- *(--krnstack) = ebp;
- *(--krnstack) = ecx;
- *(--krnstack) = ebx;
- *(--krnstack) = 0;//eax，到最后作为fork()的返回值，即子进程的pid
- p->kernelstack = krnstack;
- ......
+/* system_call.s文件 switch_to 之后 */
+.align 2
+first_return_from_kernel:
+    popl %edx
+    popl %edi
+    popl %esi
+    pop  %gs
+    pop  %fs
+    pop  %es
+    pop  %ds
+    iret
